@@ -1,0 +1,5 @@
+---
+dir: /home/httpd/www/my_blog
+opts: 
+- 3055
+- 127.0.0.1

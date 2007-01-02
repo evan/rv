@@ -1,0 +1,65 @@
+
+COPYRIGHT
+
+    Rv camping deployment tool, copyright 2006 Cloudburst, LLC 
+    (see the LICENSE file)
+
+DETAILED DOCUMENTATION
+
+    http://blog.evanweaver.com/articles/2006/12/19/rv-a-tool-for-luxurious-camping
+
+QUICKSTART
+
+  Make a folder /etc/rv/. Also, copy etc/init.d/rv to the /etc/init.d/ folder. 
+  Change the USER='httpd' near the top to the user the daemons should 
+  run as (never root!).
+  
+  Install as a boot service (on Ubuntu) with:  
+   
+    $ sudo /usr/sbin/update-rc.d rv defaults
+    
+  If you are not using Ubuntu you may have to do something different. 
+  Redhat uses chkconfig. Gentoo uses something else yet probably. On 
+  OS X you can try to get launchd to work, if you are bold.
+
+USAGE
+
+  Copy the included harness/rv_harness.rb to your camping application's 
+  folder. Edit it appropriately for your app and database. 
+  
+  Then, copy the example etc/rv/my_blog.yml file into /etc/rv. Rename 
+  and edit it appropriately for your app. You need to set the path, proxy 
+  port, and listen interface. For more apps, you can just add more .yml 
+  files.
+  
+  Now you can manually start, stop or restart all your camping daemons 
+  by calling:
+
+    $ sudo /etc/init.d/rv start    
+    $ sudo /etc/init.d/rv stop
+    $ sudo /etc/init.d/rv restart
+
+APACHE SETUP
+
+  In most situations, you will also need an Apache vhost entry in httpd.conf 
+  to reference the camping proxy started by rv. Here's one for Apache 2.2:
+
+  <VirtualHost *:80>
+      ServerName myblog.j2ee.com
+    
+      ProxyRequests Off
+      ProxyPass / http://127.0.0.1:3055/
+      ProxyPassReverse / http://127.0.0.1:3055/
+      ProxyPreserveHost On
+    
+      #Fix for Apache bug 39499
+      SetEnv force-proxy-request-1.0 1
+      SetEnv proxy-nokeepalive 1
+  </VirtualHost>
+
+CHANGELOG
+    
+    2. mongrel static directory handler
+    1. ridin' dir-tay
+
+
