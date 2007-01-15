@@ -57,7 +57,7 @@ if %w[start restart stop status].include? ACTION
             end
             File.delete pidfile            
           else
-            puts "  Pid file not found (probably not running to begin with)"
+            puts "  Pid file #{pidfile.inspect} not found (probably not running to begin with)"
           end
       end
       if ACTION =~ /restart|start/
