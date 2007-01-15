@@ -30,6 +30,8 @@ end
 if %w[start restart stop status].include? ACTION
   Dir.glob "/etc/rv/*.yml" do |f|
     c = YAML.load_file f
+
+    f = f.split('/').last
     puts "Application #{f}:"
 
     Dir.chdir c['dir'] do
