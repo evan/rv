@@ -28,7 +28,7 @@ app::Models::Base.logger = Logger.new(LOGFILE) # comment me out if you don't wan
 app::Models::Base.threaded_connections=false
 app.create
 
-config = Mongrel::Configurator.new :host => ADDR, :pid_file => PIDFILE do
+config = Mongrel::Configurator.new :host => @address, :pid_file => @pid do
   listener :port => PORT do
     uri '/', :handler => Mongrel::Camping::CampingHandler.new(app)
     # use the mongrel static server in production instead of the camping controller
