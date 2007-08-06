@@ -214,7 +214,7 @@ class Rv
       exit_with "Couldn't write to '#{options['conf_dir']}'. Please rerun with 'sudo'."
     end
     
-    exit_with "All done. Please double-check the database configuration in 'rv_harness.rb';\nthen run '/etc/init.d/rv start'."
+    exit_with "All done. Please double-check the database configuration in 'rv_harness.rb';\nthen run 'sudo /etc/init.d/rv start'."
   end
   
   # Installs the 'rv' executable into /etc/init.d.
