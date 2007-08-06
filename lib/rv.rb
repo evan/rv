@@ -223,6 +223,7 @@ class Rv
     bin_target = "/etc/init.d/rv"
     begin
       File.copy bin_source, bin_target
+      system("chmod u+x #{bin_target}")
     rescue Errno::EACCES
       exit_with "Couldn't write to '#{bin_target}'. Please rerun with 'sudo'."
     end
