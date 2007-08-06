@@ -3,14 +3,25 @@ require 'yaml'
 require 'ftools'
 require 'highline/import'
 
-# This class implements all the functionality of Rv. You shouldn't need to use this class directly, rather, use the <tt>rv</tt> executable.
+=begin rdoc
+This class implements all the functionality of Rv. You shouldn't need to use this class directly, rather, use the <tt>rv</tt> executable. However, you may want to override some of the keys in the DEFAULT hash by passing them to Rv.new in the executable. 
+
+Available keys are:
+* <tt>'conf_dir'</tt> - the directory of the YAML configuration files.
+* <tt>'user'</tt> - the system user used to start the apps.
+* <tt>'max_tries'</tt> - the number of retries before giving up on an app (each try takes a half second).
+* <tt>'log'</tt> - the path to Rv's own logfile.
+* <tt>'ruby'</tt> - a string used to start the Ruby interpreter.
+
+=end
+
 class Rv
 
   class << self
   
     # Get an Rv parameter from the process environment variables.
-    def env(key)
-      value = ENV["#{RV}_#{key.upcase}"]
+    def env(key) #:nodoc:
+      value = ENV["RV_#{key.upcase}"]
       raise "Rv key #{key} not found" unless value
       
       if value == value.to_i.to_s 
@@ -21,14 +32,14 @@ class Rv
     end
     
     # Turn an underscored name into a class reference.
-    def classify(string)
+    def classify(string) #:nodoc:
       eval("::" + string.split("_").map do |word| 
         word.capitalize
       end.join)
     end
     
     # Get the canonical pid_file name.
-    def pid_file(app = nil, port = nil)
+    def pid_file(app = nil, port = nil) #:nodoc:
       "#{app || env('app')}.#{port || env('port')}.pid"
     end
     
@@ -37,12 +48,11 @@ class Rv
   DEFAULTS = {
     'user' => 'httpd',
     'ruby' => '/usr/bin/env ruby',
-    'pidfile' => 'application.pid',
     'conf_dir' => '/etc/rv', 
-    'harness' => 'rv_harness.rb',
     'log' => '/var/log/rv.log',
-    'null_stream' => "< /dev/null > /dev/null 2>&1",
-    'log_stream' => "< /dev/null >> 'log' 2>&1"
+    'null_stream' => '< /dev/null > /dev/null 2>&1',
+    'log_stream' => '< /dev/null >> #{LOG} 2>&1',
+    'max_tries' => 10
   }
   
   VALID_ACTIONS = ['start', 'restart', 'stop', 'status', 'setup', 'install']
@@ -55,7 +65,7 @@ class Rv
     raise "Invalid options #{extra_keys.join(', ')}" if extra_keys.any?    
 
     @options = DEFAULTS.merge(opts)
-    options['log_stream'].sub!("log", options['log'])
+    options['log_stream'].sub!('#{LOG}', options['log'])
     
     # make sure the log exists
     begin 
@@ -89,6 +99,8 @@ class Rv
     
   end
   
+  private
+  
   # Runs a daemon action. Only called from <tt>perform</tt>.
   def daemon(action, match)
     filenames = Dir["#{options['conf_dir']}/#{match}.yml"]
@@ -107,8 +119,8 @@ class Rv
           config = real_config.dup
           @port = config['port'] += cluster_index
 
-          pidfile = Rv.pid_file(config['app'], config['port'])  
-          pid = File.open(pidfile).readlines.first.chomp rescue nil
+          pid_file = Rv.pid_file(config['app'], config['port'])  
+          pid = File.open(pid_file).readlines.first.chomp rescue nil
           running = pid ? `ps -p #{pid}`.split("\n")[1] : nil
          
           case action         
@@ -127,20 +139,27 @@ class Rv
                 note "stopped"
               elsif pid
                 note "not running"
-                File.delete pidfile            
+                File.delete pid_file            
               else
-                note "pid file #{pidfile.inspect} not found. Application was probably not running."
+                note "pid file #{pid_file.inspect} not found. Application was probably not running."
               end
             when "start"
               unless running 
                 env_variables = config.map {|key, value| "RV_#{key.upcase}=#{value}"}.join(" ")
                 system %[nohup su -c "#{env_variables} #{options['ruby']} #{options['harness']} #{options['null_stream']}" #{options['user']} #{options['log_stream']} &]
-                sleep(2)
-                if File.exist? pidfile
-                  note "started"
-                else
+                
+                # wait for the app to initialize
+                tries = 0
+                begin
+                  sleep(0.5)
+                  tries += 1
+                end while tries < options['max_tries'] and !File.exist?(pid_file)
+                if File.exist?(pid_file)
+                  note "started" 
+                else 
                   note "failed to start"
                 end
+                
               else
                 note "already running"
               end
@@ -241,5 +260,10 @@ class Rv
     puts "  #{msg.capitalize} (#{@port})"
   end
   
+  # system() with debugging output
+  def system(string)
+    $stderr.puts string if ENV['RV_DEBUG']
+    super
+  end
   
 end

@@ -1,8 +1,11 @@
 #!/usr/bin/env ruby
 
 =begin rdoc
-Executable for running Rv. Accepts <tt>start</tt>, <tt>restart</tt>, <tt>stop</tt>, <tt>status</tt>, <tt>setup</tt> and 
-<tt>install</tt> as valid action parameters.
+Executable for running Rv. 
+
+Accepts <tt>start</tt>, <tt>restart</tt>, <tt>stop</tt>, <tt>status</tt>, <tt>setup</tt> and <tt>install</tt> as command-line parameters.
+
+See the Rv class for a list options which can be passed to Rv.new, below.
 =end
 
 require 'rubygems'

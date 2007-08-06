@@ -22,7 +22,7 @@ First, run:
   sudo gem install rv
   sudo rv install
   
-Now you have a file <tt>/etc/init.d/rv</tt>. Open it and change the <tt>'user'</tt> keypair in the file if your app user is not <tt>httpd</tt>. There are a few other options you can set; see the Rv class for details.
+This copies a very small script to <tt>/etc/init.d/rv</tt>. <b>Edit it and change the <tt>'user'</tt> keypair in the file if your app user is not <tt>httpd</tt>.</b> There are a few other options you can set; see the Rv class for details.
 
 Now, install it as a boot service. On Ubuntu, run:
   sudo /usr/sbin/update-rc.d rv defaults
@@ -37,8 +37,15 @@ Each Camping app should live in its own directory. Traverse to this directory an
 
 It will now start at boot. You can start it manually (along with your other Rv apps) by running:
   sudo /etc/init.d/rv start
+  
+The script also responds to <tt>status</tt>, <tt>restart</tt>, and <tt>stop</tt>.
 
-Check <tt>/var/log/rv.log</tt> as well as the application log if you're having problems.
+== Troubleshooting
+
+If you're having problems, run:
+  RV_DEBUG=true sudo /etc/init.d/rv start
+  
+Copy out the inner command (between the '<tt>nohup su -c "</tt>' and the first '<tt>< /dev/null...</tt>') and try running it by hand. Make sure you're using the correct user. You can also check <tt>/var/log/rv.log</tt> as well as the application log.
 
 == Apache configuration
 
