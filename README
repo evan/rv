@@ -1,92 +1,77 @@
 
 Rv
 
-A camping deployment tool.
+A little <tt>init.d</tt> system for running Camping apps.
 
 == License
 
-Copyright 2007 Cloudburst, LLC. See included LICENSE file.
+Copyright 2007 Cloudburst, LLC. See the included LICENSE file.
+
+== Features
+
+* cluster support
+* custom database configuration
+* automated setup tasks
+
+Linux is required. Ubuntu is known to work; Gentoo should work; others should work with minor or no changes.
 
 == Installation
 
   sudo gem install rv
-  rv install
+  sudo rv install
   
-Next, copy <tt>rv</tt> to your <tt>init.d</tt> directory:
-  sudo cp `which rv` /etc/init.d/
-  
-Change the <tt>USER</tt> parameter at the top of the file if your app user is not 'httpd'.
+Now you have a file <tt>/etc/init.d/rv</tt>. Open it and change the <tt>'user'</tt> keypair in the file if your app user is not <tt>httpd</tt>. There are a few other options you can set; see the Rv class for details.
 
 Now, install it as a boot service. On Ubuntu, run:
   sudo /usr/sbin/update-rc.d /etc/init.d/rv defaults
 
-On Gentoo, run: 
+On Gentoo, run:
   sudo rc-update add rv default
 
 == Application setup
 
 Each Camping app should live in its own directory. Traverse to this directory and run:
-  rv setup
+  sudo rv setup
 
-App configurations go in <tt>/etc/rv/</tt>. Create this directory if it doesn't exist.
+It will now start at boot. You can start it manually (along with your other Rv apps) by running:
+  sudo /etc/init.d/rv start
 
+Check <tt>/var/log/rv.log</tt> as well as the application log if you're having problems.
 
+== Apache configuration
 
-==
-
-
-  Make a folder /etc/rv/. Also, copy etc/init.d/rv to the /etc/init.d/ folder. 
-  Change the USER='httpd' near the top to the user the daemons should 
-  run as (never root!).
-  
-  Install as a boot service (on Ubuntu) with:  
-   
-    $ sudo /usr/sbin/update-rc.d rv defaults
-    
-  If you are not using Ubuntu you may have to do something different. 
-  Redhat uses chkconfig. Gentoo uses something else yet probably. On 
-  OS X you can try to get launchd to work, if you are bold.
-
-USAGE
-
-  Copy the included harness/rv_harness.rb to your camping application's 
-  folder. Edit it appropriately for your app and database. 
-  
-  Then, copy the example etc/rv/my_blog.yml file into /etc/rv. Rename 
-  and edit it appropriately for your app. You need to set the path, proxy 
-  port, and listen interface. For more apps, you can just add more .yml 
-  files.
-  
-  Now you can manually start, stop or restart all your camping daemons 
-  by calling:
-
-    $ sudo /etc/init.d/rv start    
-    $ sudo /etc/init.d/rv stop
-    $ sudo /etc/init.d/rv restart
-
-APACHE SETUP
-
-  In most situations, you will also need an Apache vhost entry in httpd.conf 
-  to reference the camping proxy started by rv. Here's one for Apache 2.2:
+If you're using Apache 2.2, here's how to configure it to see your Camping proxy. Add a <tt>VirtualHost</tt> entry in your <tt>httpd.conf</tt> as follows:
 
   <VirtualHost *:80>
-      ServerName myblog.j2ee.com
+    ServerName myapp.example.com
     
-      ProxyRequests Off
-      ProxyPass / http://127.0.0.1:3055/
-      ProxyPassReverse / http://127.0.0.1:3055/
-      ProxyPreserveHost On
+    ProxyRequests Off
+    ProxyPass / http://127.0.0.1:4000/
+    ProxyPassReverse / http://127.0.0.1:4000/
+    ProxyPreserveHost On
     
-      #Fix for Apache bug 39499
-      SetEnv force-proxy-request-1.0 1
-      SetEnv proxy-nokeepalive 1
+    #Fix for Apache bug 39499
+    SetEnv force-proxy-request-1.0 1
+    SetEnv proxy-nokeepalive 1
   </VirtualHost>
+  
+If you configured a cluster, use a <tt>Proxy balancer</tt> instead:
 
-CHANGELOG    
-    
+  <Proxy balancer://myapp_custer>
+    BalancerMember http://127.0.0.1:4000
+    BalancerMember http://127.0.0.1:4001
+    BalancerMember http://127.0.0.1:4002
+    # etc.
+  </Proxy>
+
+and then configure your <tt>ProxyPass</tt> to point to the balancer:
+
+  ProxyPass / balancer://myapp_custer/
+  ProxyPassReverse / balancer://myapp_custer/
+  
+Do not use the line <tt>ProxyRequests Off</tt>.
+
 == Further resources
 
-* http://blog.evanweaver.com/pages/code#kirby
-* http://rubyforge.org/forum/forum.php?forum_id=13984
-
-
+* http://blog.evanweaver.com/pages/code#rv
+* http://rubyforge.org/forum/forum.php?forum_id=13987

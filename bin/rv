@@ -1,6 +1,11 @@
 #!/usr/bin/env ruby
 
+=begin rdoc
+Executable for running Rv. Accepts <tt>start</tt>, <tt>restart</tt>, <tt>stop</tt>, <tt>status</tt>, <tt>setup</tt> and 
+<tt>install</tt> as valid action parameters.
+=end
+
 require 'rubygems'
 require 'rv'
 
-Rv.new.perform(ARGV[0])
+Rv.new('user' => 'httpd').perform(ARGV[0])

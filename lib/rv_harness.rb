@@ -1,28 +1,29 @@
 
-# Example mongrel harness for Camping apps with Rv
+# Mongrel harness for Camping apps with Rv.
+
 require 'rubygems'
 require 'mongrel'
 require 'mongrel/camping'
+require 'rv'
 
-# Whatever options you want passed in from the 'opts' key in the .yml configuration
-app_name, port = ARGV[0], ARGV[1].to_i
+app_name, port = Rv.env('app'), Rv.env('port')
 
 # Load the Camping app
-require app_name 
-app = eval(app_name.split("_").map {|word| word.capitalize}.join)
+require app_name
+app = Rv.classify(app_name)
 
 # Configure your database
 app::Models::Base.establish_connection(
   :adapter => 'mysql',
-  :database => app_name,
+  :database => "#{app_name}_production",
   :username => 'root'
 )
 
-#app::Models::Base.logger = Logger.new('mongrel.log')
+#app::Models::Base.logger = Logger.new("#{app_name}.log")
 app::Models::Base.threaded_connections = false
 app.create
 
-Mongrel::Configurator.new :host => '127.0.0.1', :pid_file => 'mongrel.pid' do
+Mongrel::Configurator.new :host => '127.0.0.1', :pid_file => Rv.pid_file do
   
   listener :port => port do    
     # setup routes
@@ -34,7 +35,6 @@ Mongrel::Configurator.new :host => '127.0.0.1', :pid_file => 'mongrel.pid' do
     setup_signals
     run
     write_pid_file
-    log "#{app_name} available at #{interface}:#{port}"
     join
   end
     

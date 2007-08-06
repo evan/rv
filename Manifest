@@ -1,9 +1,8 @@
+lib/rv_harness.rb
 lib/rv.rb
-examples/rv_harness.rb
-examples/my_blog.yml
 bin/rv
 Rakefile
 README
+Manifest
 LICENSE
 CHANGELOG
-Manifest
