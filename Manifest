@@ -1,6 +1,7 @@
 lib/rv_harness.rb
 lib/rv.rb
 bin/rv
+TODO
 Rakefile
 README
 Manifest
