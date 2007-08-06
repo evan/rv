@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'rv'
+
+Rv.new.perform(ARGV[0])
