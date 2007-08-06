@@ -1,5 +1,6 @@
 
-# Mongrel harness for Camping apps with Rv.
+# Mongrel harness for Camping apps with Rv. 
+# Version 3
 
 require 'rubygems'
 require 'mongrel'

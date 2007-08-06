@@ -158,11 +158,13 @@ class Rv
     harness_source = "#{File.dirname(__FILE__)}/rv_harness.rb"
     harness_target = "#{this_dir}/rv_harness.rb"
 
-    unless File.exist? harness_target
+    if !File.exist?(harness_target) or
+        (File.open(harness_target).readlines[2] != File.open(harness_source).readlines[2] and
+        agree("rv_harness.rb is out-of-date; overwrite? "))
       puts "Installing rv_harness.rb file."
       File.copy harness_source, harness_target
     else
-      puts "rv_harness.rb already installed."
+      puts "rv_harness.rb not changed."
     end
     
     defaults = {
@@ -212,7 +214,7 @@ class Rv
       exit_with "Couldn't write to '#{options['conf_dir']}'. Please rerun with 'sudo'."
     end
     
-    exit_with "All done. Please double-check the database configuration in '#{harness_target}'; then run 'sudo rv start'."
+    exit_with "All done. Please double-check the database configuration in 'rv_harness.rb';\nthen run '/etc/init.d/rv start'."
   end
   
   # Installs the 'rv' executable into /etc/init.d.

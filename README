@@ -17,13 +17,15 @@ Linux is required. Ubuntu is known to work; Gentoo should work; others should wo
 
 == Installation
 
+First, run:
+
   sudo gem install rv
   sudo rv install
   
 Now you have a file <tt>/etc/init.d/rv</tt>. Open it and change the <tt>'user'</tt> keypair in the file if your app user is not <tt>httpd</tt>. There are a few other options you can set; see the Rv class for details.
 
 Now, install it as a boot service. On Ubuntu, run:
-  sudo /usr/sbin/update-rc.d /etc/init.d/rv defaults
+  sudo /usr/sbin/update-rc.d rv defaults
 
 On Gentoo, run:
   sudo rc-update add rv default
