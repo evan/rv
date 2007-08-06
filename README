@@ -15,6 +15,8 @@ Copyright 2007 Cloudburst, LLC. See the included LICENSE file.
 
 Linux is required. Ubuntu is known to work; Gentoo should work; others should work with minor or no changes.
 
+= Usage
+
 == Installation
 
 First, run:
@@ -39,6 +41,8 @@ The app will now start at boot. You can start it manually (along with your other
   sudo /etc/init.d/rv start
 
 The script also responds to <tt>status</tt>, <tt>restart</tt>, and <tt>stop</tt>. You can adjust the app-specific configuration later by rerunning <tt>sudo rv setup</tt> or by editing <tt>/etc/rv/your_app.yml</tt>.
+
+= Extras
 
 == Troubleshooting
 
@@ -86,6 +90,8 @@ If you configured a cluster, use a <tt>Proxy balancer</tt> instead:
   </VirtualHost>
   
 Do not use the line <tt>ProxyRequests Off</tt>.
+
+= More
 
 == Further resources
 
