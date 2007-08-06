@@ -35,10 +35,10 @@ On Gentoo, run:
 Each Camping app should live in its own directory. Traverse to this directory and run:
   sudo rv setup
 
-It will now start at boot. You can start it manually (along with your other Rv apps) by running:
+The app will now start at boot. You can start it manually (along with your other Rv apps) by running:
   sudo /etc/init.d/rv start
-  
-The script also responds to <tt>status</tt>, <tt>restart</tt>, and <tt>stop</tt>.
+
+The script also responds to <tt>status</tt>, <tt>restart</tt>, and <tt>stop</tt>. You can adjust the app-specific configuration later by rerunning <tt>sudo rv setup</tt> or by editing <tt>/etc/rv/your_app.yml</tt>.
 
 == Troubleshooting
 
@@ -66,17 +66,24 @@ If you're using Apache 2.2, here's how to configure it to see your Camping proxy
   
 If you configured a cluster, use a <tt>Proxy balancer</tt> instead:
 
-  <Proxy balancer://myapp_custer>
-    BalancerMember http://127.0.0.1:4000
-    BalancerMember http://127.0.0.1:4001
-    BalancerMember http://127.0.0.1:4002
-    # etc.
-  </Proxy>
+  <VirtualHost *:80>
+    ServerName myapp.example.com
 
-and then configure your <tt>ProxyPass</tt> to point to the balancer:
+    <Proxy balancer://myapp_custer>
+      BalancerMember http://127.0.0.1:4000
+      BalancerMember http://127.0.0.1:4001
+      BalancerMember http://127.0.0.1:4002
+      # etc.
+    </Proxy>
 
-  ProxyPass / balancer://myapp_custer/
-  ProxyPassReverse / balancer://myapp_custer/
+    ProxyPass / balancer://myapp_custer/
+    ProxyPassReverse / balancer://myapp_custer/
+    ProxyPreserveHost On
+
+    #Fix for Apache bug 39499
+    SetEnv force-proxy-request-1.0 1
+    SetEnv proxy-nokeepalive 1  
+  </VirtualHost>
   
 Do not use the line <tt>ProxyRequests Off</tt>.
 
