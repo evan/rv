@@ -1,0 +1,9 @@
+lib/rv.rb
+examples/rv_harness.rb
+examples/my_blog.yml
+bin/rv
+Rakefile
+README
+LICENSE
+CHANGELOG
+Manifest

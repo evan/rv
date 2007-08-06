@@ -23,9 +23,14 @@ Now, install it as a boot service. On Ubuntu, run:
 On Gentoo, run: 
   sudo rc-update add rv default
 
-== App configuration
+== Application setup
 
-App configurations go in <tt>/etc/rv/</tt>. Create this directory if it doesn't exist. 
+Each Camping app should live in its own directory. Traverse to this directory and run:
+  rv setup
+
+App configurations go in <tt>/etc/rv/</tt>. Create this directory if it doesn't exist.
+
+
 
 ==
 

@@ -6,18 +6,19 @@ class Rv
     'user' => 'httpd',
     'ruby' => '/usr/bin/env ruby',
     'pidfile' => 'mongrel.pid',
+    'conf_dir' => '/etc/rv', 
     'harness' => 'rv_harness.rb',
     'log' => '/var/log/rv.log',
     'null_stream' => "< /dev/null > /dev/null 2>&1",
     'log_stream' => "< /dev/null >> 'log' 2>&1"
   }
   
-  VALID_ACTIONS = ['start', 'restart', 'stop', 'status']
+  VALID_ACTIONS = ['start', 'restart', 'stop', 'status', 'setup']
   
   attr_accessor :options
     
   # Create an Rv instance. You can pass an optional hash to override any key in DEFAULTS.
-  def new(opts = {})
+  def initialize(opts = {})
     extra_keys = opts.keys - DEFAULTS.keys
     raise "Invalid options #{extra_keys.join(', ')}" if extra_keys.any?    
 
@@ -25,14 +26,19 @@ class Rv
     options['log_stream'].sub!("log", options['log'])
     
     # make sure the log exists
-    unless File.exist? options['log']
-      File.open(options['log'], "w") {}
-    end    
+    begin 
+      unless File.exist? options['log']
+        File.open(options['log'], "w") {}
+      end
+    rescue Errno::EACCES
+      exit_with "Couldn't write to logfile '#{options['log']}'"
+    end
   end
     
   # Perform any action in VALID_ACTIONS. Defaults to running against all applications. Pass a specific app name as <tt>match</tt> if this is not what you want.
   def perform(action, match = '*')
-    raise "Invalid action #{action}" unless VALID_ACTIONS.include? action
+    exit_with "No action given." unless action
+    exit_with "Invalid action '#{action}'." unless VALID_ACTIONS.include? action
     
     # Restart is a composite task
     if action == "restart"
@@ -41,10 +47,20 @@ class Rv
       return
     end
     
+    # Setup is a special task
+    if action == "setup"
+      
+      return
+    end
+    
+    # Other tasks
+    filenames = Dir["#{options['conf_dir']}/#{match}.yml"]
+    exit_with("No applications found for '#{match}' in #{options['conf_dir']}/") if filenames.empty?
+    
     # Examine matching applications
-    Dir.glob "/etc/rv/#{match}.yml" do |application|      
-      config = YAML.load_file application
-      application = application[/.*\/(.+)\.yml/, 1]
+    filenames.each do |filename|      
+      config = YAML.load_file(filename)
+      application = filename[/.*\/(.+)\.yml/, 1]
       puts "Application #{application}:"
   
       Dir.chdir config['dir'] do
@@ -84,6 +100,13 @@ class Rv
         
       end
     end    
+  end
+  
+  private
+  
+  def exit_with(msg)
+    puts msg
+    exit
   end
   
 end
