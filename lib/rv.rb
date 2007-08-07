@@ -50,6 +50,7 @@ class Rv
     'ruby' => '/usr/bin/env ruby',
     'conf_dir' => '/etc/rv', 
     'log' => '/var/log/rv.log',
+    'harness' => 'rv_harness.rb',
     'null_stream' => '< /dev/null > /dev/null 2>&1',
     'log_stream' => '< /dev/null >> #{LOG} 2>&1',
     'max_tries' => 10
@@ -175,15 +176,15 @@ class Rv
     this_dir = `pwd`.chomp
     app_name = this_dir.split("/").last
     harness_source = "#{File.dirname(__FILE__)}/rv_harness.rb"
-    harness_target = "#{this_dir}/rv_harness.rb"
+    harness_target = "#{this_dir}/#{options['harness']}"
 
     if !File.exist?(harness_target) or
         (File.open(harness_target).readlines[2] != File.open(harness_source).readlines[2] and
-        agree("rv_harness.rb is out-of-date; overwrite? "))
-      puts "Installing rv_harness.rb file."
+        agree("#{options['harness']} is out-of-date; overwrite? "))
+      puts "Installing #{options['harness']} file."
       File.copy harness_source, harness_target
     else
-      puts "rv_harness.rb not changed."
+      puts "#{options['harness']} not changed."
     end
     
     defaults = {
@@ -233,7 +234,7 @@ class Rv
       exit_with "Couldn't write to '#{options['conf_dir']}'. Please rerun with 'sudo'."
     end
     
-    exit_with "All done. Please double-check the database configuration in 'rv_harness.rb';\nthen run 'sudo /etc/init.d/rv start'."
+    exit_with "All done. Please double-check the database configuration in '#{options['harness']}';\nthen run 'sudo /etc/init.d/rv start'."
   end
   
   # Installs the 'rv' executable into /etc/init.d.
