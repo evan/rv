@@ -1,5 +1,5 @@
 
-v3. Gem'd; RDoc documentation; automated setup scripts; cluster support. Incompatible changes. Pre-release.
+v3. Gem'd; RDoc documentation; automated setup scripts; cluster support; accurate status reporting. Incompatible changes
 
 v2. Mongrel static directory handler.
 
