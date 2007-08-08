@@ -80,7 +80,6 @@ class Rv
     end
     system "chown #{options['user']} #{options['log']} #{options['null_stream']}"
     system "chgrp #{options['user']} #{options['log']} #{options['null_stream']}"
-
   end
     
   # Perform any action in VALID_ACTIONS. Defaults to running against all applications. Pass a specific app name as <tt>match</tt> if this is not what you want.
@@ -108,9 +107,12 @@ class Rv
   # Runs a daemon action. Only called from <tt>perform</tt>.
   def daemon(action, match)
     filenames = Dir["#{options['conf_dir']}/#{match}.yml"]
+
+    # sanity checks
     exit_with("No applications found for '#{match}' in #{options['conf_dir']}/") if filenames.empty?
+    exit_with("Can't write to the log (#{options['log']})") unless check_log
     
-    # Examine matching applications
+    # examine matching applications
     filenames.each do |filename|      
 
       real_config = YAML.load_file(filename)
@@ -138,7 +140,7 @@ class Rv
             when "stop"
               if pid and check_pid(pid)
                 # send a hard kill
-                system %[nohup sudo -u #{options['user']} kill -9 #{pid} #{options['log_stream']}]                
+                run "kill -9 #{pid}"               
                 # remove the pid file, since we didn't let mongrel to do it
                 sleep(0.5)
                 unless check_pid(pid)
@@ -157,8 +159,7 @@ class Rv
             when "start"
               unless check_pid(pid) 
                 env_variables = config.map {|key, value| "RV_#{key.upcase}=#{value}"}.join(" ")
-                system %[nohup sudo -u #{options['user']} #{options['env']} #{env_variables} #{options['ruby']} #{options['harness']} #{options['log_stream']} &]
-                
+                run "#{options['env']} #{env_variables} #{options['ruby']} #{options['harness']}", true                
                 # wait for the app to initialize
                 tries = 0
                 begin
@@ -267,28 +268,38 @@ class Rv
     puts msg
     exit
   end
+
+  # Makes sure the log is writeable.
+  def check_log
+    run "touch #{options['log']}"
+  end
   
+  # Reads a pid number from a pid_file.
+  def get_pid(pid_file)
+    File.open(pid_file).readlines.first.chomp rescue nil
+  end
+  
+  # Checks if the process number <tt>pid</tt> is running.
+  def check_pid(pid = nil)
+    if pid
+      `ps -p #{pid}`.split("\n")[1]
+    end
+  end
+      
   # Prints a message along with the current port.
   def note(msg)
     puts "  #{msg.capitalize} (#{@port})"
   end
+
+  # Runs a command as the app user, with log redirects, in a way that doubly detaches from the terminal and doesn't require a shell.
+  def run(cmd, background = false)
+    system %[nohup sudo -u #{options['user']} #{cmd} #{options['log_stream']} #{'&' if background}]
+  end 
   
   # system() with debugging output
   def system(string)
     $stderr.puts string if ENV['RV_DEBUG']
     super
-  end
-  
-  private
-  
-  def get_pid(pid_file)
-    File.open(pid_file).readlines.first.chomp rescue nil
-  end
-  
-  def check_pid(pid = nil)
-    if pid
-      `ps -p #{pid}`.split("\n")[1]
-    end
   end
   
 end
