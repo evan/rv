@@ -1,7 +1,7 @@
 
 Rv
 
-A little <tt>init.d</tt> system for running Camping apps.
+A little <tt>init.d</tt> system for running Camping apps, for Linux.
 
 == License
 
@@ -13,7 +13,9 @@ Copyright 2007 Cloudburst, LLC. See the included LICENSE file.
 * custom database configuration
 * interactive setup tasks
 
-Linux is required. Ubuntu is known to work; Gentoo should work; others should work with minor or no changes.
+Linux is required. Ubuntu and Gentoo are known to work.
+
+Rv is designed for Camping, but it can actually manage any app for which you write a compatible Mongrel harness.
 
 = Usage
 
