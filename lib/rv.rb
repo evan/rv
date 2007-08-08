@@ -11,7 +11,8 @@ Available keys are:
 * <tt>'user'</tt> - the system user used to start the apps.
 * <tt>'max_tries'</tt> - the number of retries before giving up on an app (each try takes a half second).
 * <tt>'log'</tt> - the path to Rv's own logfile.
-* <tt>'ruby'</tt> - a string used to start the Ruby interpreter.
+* <tt>'env'</tt> - the path to the <tt>env</tt> utility.
+* <tt>'ruby'</tt> - name of the Ruby interpreter.
 
 =end
 
@@ -47,7 +48,8 @@ class Rv
 
   DEFAULTS = {
     'user' => 'httpd',
-    'ruby' => '/usr/bin/env ruby',
+    'env' => '/usr/bin/env',
+    'ruby' => 'ruby',
     'conf_dir' => '/etc/rv', 
     'log' => '/var/log/rv.log',
     'harness' => 'rv_harness.rb',
@@ -154,7 +156,7 @@ class Rv
             when "start"
               unless check_pid(pid) 
                 env_variables = config.map {|key, value| "RV_#{key.upcase}=#{value}"}.join(" ")
-                system %[#{env_variables} nohup sudo -u #{options['user']} #{options['ruby']} #{options['harness']} #{options['log_stream']} &]
+                system %[nohup sudo -u #{options['user']} #{options['env']} #{env_variables} #{options['ruby']} #{options['harness']} #{options['log_stream']} &]
                 
                 # wait for the app to initialize
                 tries = 0
