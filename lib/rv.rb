@@ -12,7 +12,7 @@ Available keys are:
 * <tt>'max_tries'</tt> - the number of retries before giving up on an app (each try takes a half second).
 * <tt>'log'</tt> - the path to Rv's own logfile.
 * <tt>'env'</tt> - the path to the <tt>env</tt> utility.
-* <tt>'ruby'</tt> - name of the Ruby interpreter.
+* <tt>'ruby'</tt> - the name of the Ruby interpreter.
 
 =end
 
@@ -91,6 +91,7 @@ class Rv
     case action 
       when "restart"
         daemon("stop", match)
+        sleep(5) # wait for the sockets to get released
         daemon("start", match)
       when "install"
         install
