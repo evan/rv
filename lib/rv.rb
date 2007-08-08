@@ -158,6 +158,7 @@ class Rv
               end
             when "start"
               unless check_pid(pid) 
+                # Gentoo requires the env variables to be set within the command, not before the sudo
                 env_variables = config.map {|key, value| "RV_#{key.upcase}=#{value}"}.join(" ")
                 run "#{options['env']} #{env_variables} #{options['ruby']} #{options['harness']}", true                
                 # wait for the app to initialize
