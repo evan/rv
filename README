@@ -47,7 +47,7 @@ The script also responds to <tt>status</tt>, <tt>restart</tt>, and <tt>stop</tt>
 == Troubleshooting
 
 If you're having problems, run:
-  RV_DEBUG=true sudo /etc/init.d/rv start
+  sudo env RV_DEBUG=true /etc/init.d/rv start
   
 Copy out the inner command (between the '<tt>nohup su -c "</tt>' and the first '<tt>< /dev/null...</tt>') and try running it by hand. Make sure you're using the correct user. You can also check <tt>/var/log/rv.log</tt> as well as the application log.
 
