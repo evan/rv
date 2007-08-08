@@ -12,6 +12,7 @@ Copyright 2007 Cloudburst, LLC. See the included LICENSE file.
 * cluster support
 * custom database configuration
 * interactive setup tasks
+* logging
 
 Linux is required. Ubuntu and Gentoo are known to work.
 
