@@ -121,12 +121,11 @@ class Rv
           @port = config['port'] += cluster_index
 
           pid_file = Rv.pid_file(config['app'], config['port'])  
-          pid = File.open(pid_file).readlines.first.chomp rescue nil
-          running = pid ? `ps -p #{pid}`.split("\n")[1] : nil
+          pid = get_pid(pid_file)
          
           case action         
             when "status"
-              if running
+              if check_pid(pid)
                 note "running"
               elsif pid
                 note "has died"
@@ -134,18 +133,23 @@ class Rv
                 note "not running"
               end
             when "stop"
-              if pid and running
-                system %[nohup su -c "kill -9 #{pid} #{options['null_stream']}" #{options['user']} #{options['log_stream']}]
+              if pid and check_pid(pid)
+                # send a hard kill
+                system %[nohup su -c "kill -9 #{pid} #{options['null_stream']}" #{options['user']} #{options['log_stream']}]                
+                # remove the pid file, since we didn't let mongrel to do it
+                sleep(0.5)
+                File.delete(pid_file) unless check_pid(pid)
+
                 running = nil
                 note "stopped"
               elsif pid
-                note "not running"
-                File.delete pid_file            
+                note "has already died"
+                File.delete pid_file      
               else
-                note "pid file #{pid_file.inspect} not found. Application was probably not running."
+                note "not running"
               end
             when "start"
-              unless running 
+              unless check_pid(pid) 
                 env_variables = config.map {|key, value| "RV_#{key.upcase}=#{value}"}.join(" ")
                 system %[#{env_variables} nohup sudo -u #{options['user']} #{options['ruby']} #{options['harness']} #{options['log_stream']} &]
                 
@@ -154,8 +158,10 @@ class Rv
                 begin
                   sleep(0.5)
                   tries += 1
-                end while tries < options['max_tries'] and !File.exist?(pid_file)
-                if File.exist?(pid_file)
+                  pid = get_pid(pid_file) # reset the pid
+                end while tries < options['max_tries'] and !(File.exist?(pid_file) and check_pid(pid))
+
+                if File.exist?(pid_file) and check_pid(pid)
                   note "started" 
                 else 
                   note "failed to start"
@@ -265,6 +271,18 @@ class Rv
   def system(string)
     $stderr.puts string if ENV['RV_DEBUG']
     super
+  end
+  
+  private
+  
+  def get_pid(pid_file)
+    File.open(pid_file).readlines.first.chomp rescue nil
+  end
+  
+  def check_pid(pid = nil)
+    if pid
+      `ps -p #{pid}`.split("\n")[1]
+    end
   end
   
 end
