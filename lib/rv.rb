@@ -147,7 +147,7 @@ class Rv
             when "start"
               unless running 
                 env_variables = config.map {|key, value| "RV_#{key.upcase}=#{value}"}.join(" ")
-                system %[nohup su -c "#{env_variables} #{options['ruby']} #{options['harness']} #{options['null_stream']}" #{options['user']} #{options['log_stream']} &]
+                system %[nohup sudo -u #{options['user']} "#{env_variables} #{options['ruby']} #{options['harness']} #{options['null_stream']}" #{options['log_stream']} &]
                 
                 # wait for the app to initialize
                 tries = 0
