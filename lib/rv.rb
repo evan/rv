@@ -135,13 +135,16 @@ class Rv
             when "stop"
               if pid and check_pid(pid)
                 # send a hard kill
-                system %[nohup su -c "kill -9 #{pid} #{options['null_stream']}" #{options['user']} #{options['log_stream']}]                
+                system %[nohup sudo -u #{options['user']} kill -9 #{pid} #{options['log_stream']}]                
                 # remove the pid file, since we didn't let mongrel to do it
                 sleep(0.5)
-                File.delete(pid_file) unless check_pid(pid)
-
-                running = nil
-                note "stopped"
+                unless check_pid(pid)
+                  File.delete(pid_file) 
+                  running = nil
+                  note "stopped"
+                else
+                  note "failed to stop"
+                end
               elsif pid
                 note "has already died"
                 File.delete pid_file      
