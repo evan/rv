@@ -94,7 +94,10 @@ If you configured a cluster, use a <tt>Proxy balancer</tt> instead:
   
 Do not use the line <tt>ProxyRequests Off</tt>.
 
-== Further resources
+== Reporting problems
 
 * http://rubyforge.org/forum/forum.php?forum_id=13987
+
+== Further resources
+
 * http://blog.evanweaver.com/articles/2006/12/19/rv-a-tool-for-luxurious-camping
