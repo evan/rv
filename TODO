@@ -1,4 +1,2 @@
 
-* Move database and app-specific configuration into YAML settings, and use a global rv_handler (?)
-* Move initial install task into an extconf.rb gem install hook (?)
-* Verify Gentoo support 
+* Add check for incompatible /etc/rv/*.yml files
