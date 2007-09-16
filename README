@@ -7,6 +7,8 @@ A little <tt>init.d</tt> system for running Camping apps, for Linux.
 
 Copyright 2007 Cloudburst, LLC. See the included LICENSE file.
 
+The public certificate for this gem is at http://rubyforge.org/frs/download.php/25331/evan_weaver-original-public_cert.pem.
+
 == Features
 
 * cluster support
