@@ -8,4 +8,5 @@ Echoe.new("rv") do |p|
   p.url = "http://blog.evanweaver.com/pages/code#rv"  
   p.docs_host = "blog.evanweaver.com:~/www/bax/public/files/doc/"
   p.extra_deps = ["highline"]
+  p.require_signed = true
 end
